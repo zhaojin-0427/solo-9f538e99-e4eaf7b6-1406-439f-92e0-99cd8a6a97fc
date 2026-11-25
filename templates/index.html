@@ -39,10 +39,18 @@
 <div class="card">
   <h3>上传 CSV（整季替换）</h3>
   <p class="muted">每行：试验点、品种、等面积小区实收克数；同点同品种可多行（多个小区）。
-     表头支持 试验点/品种/实收克数 或 site/variety/grams；最多 64 个试验点。</p>
+     可选列：季号、小区记录号（用于按试验点下载称重单与更正；缺省时记录号按行号补齐）。
+     表头支持 试验点/品种/实收克数/季号/小区记录号 或对应英文列；最多 64 个试验点。</p>
   <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
     <input type="file" name="file" accept=".csv" required>
     <button type="submit">上传</button>
   </form>
+</div>
+
+<div class="card">
+  <h3>称重单更正</h3>
+  <p class="muted">复称发现实收克数录错时，到
+     <a href="{{ url_for('corrections') }}">称重单更正</a> 页按试验点下载当季称重单
+     （含原始克数与当前克数），上传更正 CSV；整单校验，问题行标出并退回。</p>
 </div>
 {% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>称重单更正</h2>
+<p>当前复核版本 <b>v{{ state.id }}</b>（{{ status_text[state.status] }}）。
+   先选择试验点并下载当季称重单，再按同一试验点上传更正 CSV。
+   每行填写季号、小区记录号、所见克数、新克数；整单校验，任何一行有问题
+   都会标出并<b>整单退回</b>，原数据与取数状态保持不变。原始克数始终保留。</p>
+
+<form method="get" action="{{ url_for('corrections') }}">
+  <label>试验点
+    <select name="site" onchange="this.form.submit()">
+      {% for s in sites %}
+      <option value="{{ s.site }}" {% if s.site == site %}selected{% endif %}>{{ s.site }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <noscript><button type="submit">查看</button></noscript>
+</form>
+
+{% if site %}
+<div class="card">
+  <h3>{{ site }} · 当季称重单</h3>
+  <p><a href="{{ url_for('corrections_download', site=site) }}">下载 CSV
+     （季号、小区记录号、品种、原始克数、当前克数）</a></p>
+  <table>
+    <tr><th>季号</th><th>小区记录号</th><th>品种</th>
+        <th>原始克数</th><th>当前克数</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.season }}</td>
+      <td>{{ r.plot_record }}</td>
+      <td>{{ r.variety }}</td>
+      <td>{{ fmt(r.original_grams) }}</td>
+      <td>{{ fmt(r.grams) }}
+        {% if r.grams != r.original_grams %}<span class="warn">（已更正）</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h3>上传更正 CSV</h3>
+  <p class="muted">表头需包含 季号 / 小区记录号 / 所见克数 / 新克数；
+     行内容必须属于所选试验点 {{ site }}。季号需与当前明细一致；
+     所见克数须与下载时一致（防止基于旧单更正）。</p>
+  <form method="post" action="{{ url_for('corrections_submit') }}"
+        enctype="multipart/form-data">
+    <input type="hidden" name="site" value="{{ site }}">
+    <input type="file" name="file" accept=".csv" required>
+    <button type="submit">提交更正</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}
