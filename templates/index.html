@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>总览</h2>
+
+{% if state %}
+<div class="card">
+  <p>当前复核版本：<b>v{{ state.id }}</b>
+     （{{ status_text[state.status] }}，提交于 {{ state.created_at }}）</p>
+  {% if state.status == 'failed' %}
+    <p class="bad">拟合失败：{{ state.message or '未知原因' }}。复核决定已保留。</p>
+    <form method="post" action="{{ url_for('recompute') }}">
+      <button type="submit">重算</button>
+    </form>
+  {% elif state.status in ('pending', 'running') %}
+    <p class="warn">新关系拟合未完成，比较结果暂显示“待校正”。</p>
+  {% endif %}
+  <p>观测 {{ n_obs }} 行；试验点 {{ n_sites }} 个；品种 {{ n_varieties }} 个。</p>
+  <p>当前剔除试验点：
+    {% if excluded %}{{ excluded | join('、') }}{% else %}无{% endif %}</p>
+</div>
+
+<h3>最近复核版本</h3>
+<table>
+  <tr><th>版本</th><th>状态</th><th>剔除点数</th><th>提交时间</th><th>备注</th></tr>
+  {% for v in versions %}
+  <tr>
+    <td>v{{ v.id }}</td>
+    <td>{{ status_text[v.status] }}</td>
+    <td>{{ v.nex }}</td>
+    <td>{{ v.created_at }}</td>
+    <td class="muted">{{ v.message or '' }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="muted">尚无数据，请先上传一季试验 CSV。</p>
+{% endif %}
+
+<div class="card">
+  <h3>上传 CSV（整季替换）</h3>
+  <p class="muted">每行：试验点、品种、等面积小区实收克数；同点同品种可多行（多个小区）。
+     表头支持 试验点/品种/实收克数 或 site/variety/grams；最多 64 个试验点。</p>
+  <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required>
+    <button type="submit">上传</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # 生产部署时务必改成随机长串
+      SECRET_KEY: ${SECRET_KEY:-dev-only-secret}
+    volumes:
+      - trial-data:/data
+    restart: unless-stopped
+
+volumes:
+  trial-data:

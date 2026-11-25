@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>品种试验复核与比较</title>
+<style>
+  body{font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+       max-width:960px;margin:1.5rem auto;padding:0 1rem;color:#222}
+  nav a{margin-right:1rem}
+  .flash-ok{background:#e6f7e6;border:1px solid #8cc68c;padding:.5rem .8rem;
+            border-radius:6px;margin:.5rem 0}
+  .flash-error{background:#fde8e8;border:1px solid #e08b8b;padding:.5rem .8rem;
+               border-radius:6px;margin:.5rem 0}
+  table{border-collapse:collapse;margin:.8rem 0}
+  th,td{border:1px solid #ccc;padding:.35rem .7rem;text-align:left}
+  .muted{color:#777}
+  .card{border:1px solid #ddd;border-radius:8px;padding:1rem;margin:.8rem 0}
+  button{padding:.35rem .9rem;cursor:pointer}
+  .result-ok{font-size:1.3rem;font-weight:600}
+  .warn{color:#a05a00}
+  .bad{color:#b03030}
+</style>
+</head>
+<body>
+<nav>
+  <a href="{{ url_for('index') }}">总览</a>
+  <a href="{{ url_for('review_form') }}">复核</a>
+  <a href="{{ url_for('compare') }}">品种比较</a>
+</nav>
+<hr>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<div class="flash-{{ cat }}">{{ msg }}</div>{% endfor %}
+{% endwith %}
+{% block content %}{% endblock %}
+</body>
+</html>

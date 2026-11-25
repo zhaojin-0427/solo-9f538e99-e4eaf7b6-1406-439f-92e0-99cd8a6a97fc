@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>品种效应差比较</h2>
+
+{% if state %}
+<p>当前复核版本 <b>v{{ state.id }}</b>（{{ status_text[state.status] }}）。</p>
+
+<form method="get" action="{{ url_for('compare') }}">
+  <label>品种甲
+    <select name="a">
+      {% for v in varieties %}
+      <option value="{{ v }}" {% if v == a %}selected{% endif %}>{{ v }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  −
+  <label>品种乙
+    <select name="b">
+      {% for v in varieties %}
+      <option value="{{ v }}" {% if v == b %}selected{% endif %}>{{ v }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">比较</button>
+</form>
+
+{% if result %}
+<div class="card">
+  {% if result.kind == 'ok' %}
+    <p class="result-ok">品种效应差（甲 − 乙）= {{ '%.2f'|format(result.diff) }} 克</p>
+    <p class="muted">甲（{{ a }}）效应 {{ '%.2f'|format(result.ea) }} 克；
+       乙（{{ b }}）效应 {{ '%.2f'|format(result.eb) }} 克。
+       基于复核版本 v{{ state.id }} 的拟合结果。</p>
+  {% elif result.kind == 'pending' %}
+    <p class="warn">两品种在当前关系下可比较，但复核版本 v{{ state.id }}
+       尚未拟合完成，结果<b>待校正</b>，请稍后刷新。</p>
+  {% elif result.kind == 'failed' %}
+    <p class="bad">复核版本 v{{ state.id }} 拟合失败
+       （{{ result.message or '未知原因' }}），复核决定已保留，请重算。</p>
+    <form method="post" action="{{ url_for('recompute') }}">
+      <button type="submit">重算</button>
+    </form>
+  {% elif result.kind == 'incomparable' %}
+    <p class="bad">两品种在当前有效试验点关系下<b>不可比较</b>：
+       既未同点种植，也未通过其他品种与有效试验点连通。</p>
+  {% elif result.kind == 'error' %}
+    <p class="bad">{{ result.text }}</p>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<p class="muted">尚无数据，请先在总览页上传 CSV。</p>
+{% endif %}
+{% endblock %}
